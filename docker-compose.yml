@@ -1,0 +1,60 @@
+version: "3.2"
+
+services:
+  php:
+    build:
+      context: './infrastucture/php/'
+      args:
+       PHP_VERSION: ${PHP_VERSION}
+    networks:
+      - backend
+    volumes:
+      - ./src/:/var/www/html/
+    container_name: "${PHP_NAME}"
+
+  apache:
+    build:
+      context: './infrastucture/apache/'
+      args:
+       APACHE_VERSION: ${APACHE_VERSION}
+    depends_on:
+      - php
+      - mariadb
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "8000:80"
+    volumes:
+      - ./src/:/var/www/html/
+    container_name: "${APACHE_NAME}"
+
+  mariadb:
+    image: mariadb:${MARIADB_VERSION:-latest}
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./src/sleepy/init.sql:/init.sql
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    container_name: "${MARIADB_NAME}"
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - backend
+    restart: always
+    container_name: "${ADMINER_NAME}"
+
+networks:
+  backend:
+  frontend:
