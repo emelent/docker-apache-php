@@ -19,7 +19,7 @@ services:
        APACHE_VERSION: ${APACHE_VERSION}
     depends_on:
       - php
-      - mariadb
+      - maria_db
     networks:
       - backend
       - frontend
@@ -29,7 +29,7 @@ services:
       - ./src/:/var/www/html/
     container_name: "${APACHE_NAME}"
 
-  mariadb:
+  maria_db:
     image: mariadb:${MARIADB_VERSION:-latest}
     restart: always
     ports:
